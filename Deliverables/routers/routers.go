@@ -21,6 +21,8 @@ func Setuprouter(client *mongo.Client) *gin.Engine {
 	RefreshTokenRouter()
 	// Initialize the User routes
 	UserRouter()
+	// initialize the Loan routes
+	LoanRouter()
 
 	return Router
 }

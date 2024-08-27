@@ -8,7 +8,7 @@ import (
 
 type Loan struct {
 	ID              primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-	ApplicantID     primitive.ObjectID `bson:"applicant_id" json:"applicant_id" validate:"required"`
+	ApplicantID     primitive.ObjectID `bson:"applicant_id" json:"applicant_id"`
 	Amount          float64            `bson:"amount" json:"amount" validate:"required"`
 	LoanTerm        int                `bson:"loan_term" json:"loan_term" validate:"required"` // in months
 	InterestRate    float64            `bson:"interest_rate" json:"interest_rate" validate:"required"`

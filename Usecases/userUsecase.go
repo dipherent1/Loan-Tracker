@@ -5,8 +5,8 @@ import (
 	domain "loaner/Domain"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UserUsecase struct {
@@ -21,7 +21,7 @@ func NewUserUsecase(authRepo domain.UserRepo) *UserUsecase {
 	}
 }
 
-func (a *UserUsecase) GetUserById(c *gin.Context, id primitive.ObjectID) domain.Respose {
+func (a *UserUsecase) GetUserById(c *gin.Context, id primitive.ObjectID) domain.Response {
 	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
 	defer cancel()
 

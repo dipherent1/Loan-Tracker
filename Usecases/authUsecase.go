@@ -23,7 +23,7 @@ func NewAuthUsecase(authRepo domain.AuthRepo) *AuthUsecase {
 }
 
 // register a new user
-func (a *AuthUsecase) Register(c *gin.Context, newUser *domain.User) domain.Respose {
+func (a *AuthUsecase) Register(c *gin.Context, newUser *domain.User) domain.Response {
 	// create a new context
 	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
 	defer cancel()
@@ -32,14 +32,14 @@ func (a *AuthUsecase) Register(c *gin.Context, newUser *domain.User) domain.Resp
 
 }
 
-func (a *AuthUsecase) Login(c *gin.Context, user domain.User) domain.Respose{
+func (a *AuthUsecase) Login(c *gin.Context, user domain.User) domain.Response {
 	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
 	defer cancel()
-	
+
 	return a.authRepo.Login(ctx, user)
 }
 
-func (a *AuthUsecase) Activate(c *gin.Context, token string) domain.Respose{
+func (a *AuthUsecase) Activate(c *gin.Context, token string) domain.Response {
 	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
 	defer cancel()
 

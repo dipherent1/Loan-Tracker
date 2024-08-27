@@ -40,10 +40,10 @@ func NewAuthRepo(database *mongo.Database) *AuthRepo {
 }
 
 // register a new user
-func (a *AuthRepo) Register(ctx context.Context, newUser *domain.User) domain.Respose {
+func (a *AuthRepo) Register(ctx context.Context, newUser *domain.User) domain.Response {
 	err := passwordservice.CheckPasswordStrength(newUser.Password)
 	if err != nil {
-		return domain.Respose{
+		return domain.Response{
 			Status:  http.StatusBadRequest,
 			Message: err.Error(),
 		}
@@ -51,14 +51,14 @@ func (a *AuthRepo) Register(ctx context.Context, newUser *domain.User) domain.Re
 
 	hashedPassword, err := passwordservice.GenerateFromPasswordCustom(newUser.Password)
 	if err != nil {
-		return domain.Respose{
+		return domain.Response{
 			Status:  http.StatusInternalServerError,
 			Message: "Error hashing password",
 		}
 	}
 
 	newUser.Password = hashedPassword
-	
+
 	if newUser.UserName == "" {
 		newUser.UserName = newUser.Email + "_user"
 	}
@@ -71,7 +71,7 @@ func (a *AuthRepo) Register(ctx context.Context, newUser *domain.User) domain.Re
 
 	InsertedID, err := a.unverified.InsertOne(ctx, newUser)
 	if err != nil {
-		return domain.Respose{
+		return domain.Response{
 			Status:  http.StatusInternalServerError,
 			Message: "Error inserting user",
 		}
@@ -86,7 +86,7 @@ func (a *AuthRepo) Register(ctx context.Context, newUser *domain.User) domain.Re
 	insertedID := InsertedID.InsertedID.(primitive.ObjectID)
 	err = a.unverified.FindOne(ctx, bson.D{{"_id", insertedID}}).Decode(&userDto)
 	if err != nil {
-		return domain.Respose{
+		return domain.Response{
 			Status:  http.StatusInternalServerError,
 			Message: "Error getting user",
 		}
@@ -97,13 +97,13 @@ func (a *AuthRepo) Register(ctx context.Context, newUser *domain.User) domain.Re
 	err, status := a.SendActivationEmail(newUser.Email)
 	fmt.Println(err)
 	if err != nil {
-		return domain.Respose{
+		return domain.Response{
 			Status:  status,
 			Message: "Error sending activation email",
 		}
 	}
 
-	return domain.Respose{
+	return domain.Response{
 		Status:  http.StatusOK,
 		Message: "User registered successfully",
 		Data:    userDto,
@@ -111,7 +111,7 @@ func (a *AuthRepo) Register(ctx context.Context, newUser *domain.User) domain.Re
 }
 
 // login a user
-func (a *AuthRepo) Login(ctx context.Context, user domain.User) domain.Respose {
+func (a *AuthRepo) Login(ctx context.Context, user domain.User) domain.Response {
 	filter := bson.D{
 		{Key: "$or", Value: bson.A{
 			bson.D{{Key: "username", Value: user.UserName}},
@@ -122,14 +122,14 @@ func (a *AuthRepo) Login(ctx context.Context, user domain.User) domain.Respose {
 	var existingUser domain.User
 	err := a.verified.FindOne(ctx, filter).Decode(&existingUser)
 	if err != nil {
-		return domain.Respose{
+		return domain.Response{
 			Status:  http.StatusNotFound,
 			Message: "User not found user may not be activated",
 		}
 	}
 
 	if !passwordservice.CompareHashAndPasswordCustom(existingUser.Password, user.Password) {
-		return domain.Respose{
+		return domain.Response{
 			Status:  http.StatusUnauthorized,
 			Message: "Invalid password",
 		}
@@ -138,16 +138,16 @@ func (a *AuthRepo) Login(ctx context.Context, user domain.User) domain.Respose {
 	// generate token
 	tokens, err, statusCode := a.GenerateTokenFromUser(ctx, existingUser)
 	if err != nil {
-		return domain.Respose{
+		return domain.Response{
 			Status:  statusCode,
 			Message: "Error generating token",
 		}
 	}
 
-	return domain.Respose{
-		Status:  http.StatusOK,
-		Message: "User logged in successfully",
-		Data:    tokens,
+	return domain.Response{
+		Status:      http.StatusOK,
+		Message:     "User logged in successfully",
+		Data:        tokens,
 		AccessToken: tokens.AccessToken,
 	}
 }
@@ -192,10 +192,10 @@ func (a *AuthRepo) GenerateTokenFromUser(ctx context.Context, existingUser domai
 	}, nil, 200
 }
 
-func (a *AuthRepo) Activate(ctx context.Context, token string) domain.Respose {
+func (a *AuthRepo) Activate(ctx context.Context, token string) domain.Response {
 	email, err := jwtservice.VerifyToken(token)
 	if err != nil {
-		return domain.Respose{
+		return domain.Response{
 			Status:  http.StatusBadRequest,
 			Message: "Invalid token",
 		}
@@ -205,7 +205,7 @@ func (a *AuthRepo) Activate(ctx context.Context, token string) domain.Respose {
 	var user domain.User
 	err = a.unverified.FindOne(ctx, bson.D{{"email", email}}).Decode(&user)
 	if err != nil {
-		return domain.Respose{
+		return domain.Response{
 			Status:  http.StatusInternalServerError,
 			Message: "Error getting user",
 		}
@@ -213,7 +213,7 @@ func (a *AuthRepo) Activate(ctx context.Context, token string) domain.Respose {
 
 	_, err = a.verified.InsertOne(ctx, user)
 	if err != nil {
-		return domain.Respose{
+		return domain.Response{
 			Status:  http.StatusInternalServerError,
 			Message: "Error inserting user",
 		}
@@ -221,13 +221,13 @@ func (a *AuthRepo) Activate(ctx context.Context, token string) domain.Respose {
 
 	_, err = a.unverified.DeleteOne(ctx, bson.D{{"email", email}})
 	if err != nil {
-		return domain.Respose{
+		return domain.Response{
 			Status:  http.StatusInternalServerError,
 			Message: "Error deleting user",
 		}
 	}
 
-	return domain.Respose{
+	return domain.Response{
 		Status:  http.StatusOK,
 		Message: "User activated successfully",
 	}

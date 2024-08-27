@@ -24,17 +24,17 @@ func NewUserRepository(database *mongo.Database) *UserRepo {
 }
 
 // get user by id
-func (u *UserRepo) GetUserById(ctx context.Context, id primitive.ObjectID) domain.Respose {
+func (u *UserRepo) GetUserById(ctx context.Context, id primitive.ObjectID) domain.Response {
 	var user dtos.RegisterUserDto
 	err := u.verifiedCollections.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
 	if err != nil {
-		return domain.Respose{
+		return domain.Response{
 			Status:  500,
 			Message: "user not found",
 		}
 	}
 
-	return domain.Respose{
+	return domain.Response{
 		Status:  200,
 		Message: "User found",
 		Data:    user,

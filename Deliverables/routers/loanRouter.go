@@ -8,6 +8,7 @@ import (
 )
 
 func LoanRouter() {
+	// userRepo := repositories.NewUserRepository(DataBase)
 	loanRouter := Router.Group("/loan", authmiddleware.AuthMiddleware())
 	{
 		// generate repository
@@ -17,10 +18,11 @@ func LoanRouter() {
 		
 		loanRouter.POST("/apply", loanController.Apply)
 		loanRouter.GET("/get/:loanID", loanController.GetLoanById)
-		// loanRouter.GET("/get", authmiddleware.AuthMiddleware(), loancontroller.Get)
-		// loanRouter.GET("/getall", authmiddleware.AuthMiddleware(), loancontroller.GetAll)
-		// loanRouter.POST("/approve", authmiddleware.AuthMiddleware(), loancontroller.Approve)
-		// loanRouter.POST("/reject", authmiddleware.AuthMiddleware(), loancontroller.Reject)
-		// loanRouter.POST("/pay", authmiddleware.AuthMiddleware(), loancontroller.Pay)
+		// group by admin
+		// adminLoanRouter := loanRouter.Group("", authmiddleware.IsAdminMiddleware(userRepo))
+		// {
+		// 	// adminLoanRouter.GET("/getall", loanController.GetAllLoans)
+		// }
+		
 	}
 }

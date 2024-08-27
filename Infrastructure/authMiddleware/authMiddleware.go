@@ -1,11 +1,14 @@
 package authmiddleware
 
 import (
+	"context"
 	"fmt"
 	"loaner/Config"
 	domain "loaner/Domain"
+	dtos "loaner/Dtos"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -71,27 +74,31 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		//set claims to the context
 		c.Set("claim", &domain.AccessClaims{
-			ID:   userID,
+			ID: userID,
 		})
 
 		c.Next()
 	}
 }
 
-// func IsAdminMiddleware(user_repo .UserRepository) gin.HandlerFunc {
-// 	return func(c *gin.Context) {
+func IsAdminMiddleware(userRepo domain.UserRepo) gin.HandlerFunc {
+	return func(c *gin.Context) {
 
-// 		claim := c.MustGet("claim").(*Domain.AccessClaims)
-// 		role := claim.Role
-// 		user, _, _ := user_repo.GetUsersById(c, claim.ID, *claim)
-// 		if user.Role == "admin" || role == "admin" {
-// 			// if role == "admin" {
-// 			c.Next()
-// 		} else {
-// 			c.JSON(401, gin.H{"error": "Unauthorized"})
-// 			c.Abort()
-// 			return
-// 		}
+		claim := c.MustGet("claim").(domain.AccessClaims)
 
-// 	}
-// }
+		//get contec with timeout
+		ctx, cancel := context.WithTimeout(c, time.Second*10)
+		defer cancel()
+		response := userRepo.GetUserById(ctx, claim.ID)
+		
+		user:= response.Data.(dtos.RegisterUserDto)
+		if user.Role == "admin" {
+			c.Next()
+		} else {
+			c.JSON(401, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
+
+	}
+}

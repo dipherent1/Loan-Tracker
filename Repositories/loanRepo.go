@@ -77,3 +77,25 @@ func (l *LoanRepo) GetLoanById(ctx context.Context, loanID primitive.ObjectID, u
 	}
 }
 	
+// get all loans
+func (l *LoanRepo) GetAllLoans(ctx context.Context) domain.Response {
+	var loans []domain.Loan
+	cursor, err := l.loanCollections.Find(ctx, primitive.M{})
+	if err != nil {
+		return domain.Response{
+			Status:  500,
+			Message: "Failed to get loans",
+		}
+	}
+	defer cursor.Close(ctx)
+	for cursor.Next(ctx) {
+		var loan domain.Loan
+		cursor.Decode(&loan)
+		loans = append(loans, loan)
+	}
+	return domain.Response{
+		Status:  200,
+		Message: "Loans found",
+		Data:    loans,
+	}
+}

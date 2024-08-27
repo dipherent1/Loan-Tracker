@@ -8,6 +8,7 @@ import (
 	dtos "loaner/Dtos"
 	utils "loaner/Utils"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -68,31 +69,51 @@ func (l *LoanRepo) GetLoanById(ctx context.Context, loanID primitive.ObjectID, u
 			Message: "You are not authorized to view this loan",
 		}
 	}
-	
-	
+
 	return domain.Response{
 		Status:  200,
 		Message: "Loan found",
 		Data:    loan,
 	}
 }
-	
+
 // get all loans
 func (l *LoanRepo) GetAllLoans(ctx context.Context, filter domain.Filter) domain.Response {
 	var loans []domain.Loan
-	cursor, err := l.loanCollections.Find(ctx, primitive.M{})
+
+	pipeline := mongo.Pipeline{
+		bson.D{{"$set", bson.D{
+			{"statusOrder", bson.D{
+				{"$indexOfArray", bson.A{filter.StatusOrder, "$status"}},
+			}},
+		}}},
+		bson.D{{"$sort", bson.D{{"statusOrder", 1}}}},
+		bson.D{{"$unset", "statusOrder"}},
+	}
+
+	cur, err := l.loanCollections.Aggregate(ctx, pipeline)
 	if err != nil {
 		return domain.Response{
 			Status:  500,
 			Message: "Failed to get loans",
 		}
 	}
-	defer cursor.Close(ctx)
-	for cursor.Next(ctx) {
+
+	defer cur.Close(ctx)
+
+	for cur.Next(ctx) {
 		var loan domain.Loan
-		cursor.Decode(&loan)
+		err := cur.Decode(&loan)
+		if err != nil {
+			return domain.Response{
+				Status:  500,
+				Message: "Failed to get loans",
+			}
+		}
 		loans = append(loans, loan)
 	}
+	
+
 	return domain.Response{
 		Status:  200,
 		Message: "Loans found",

@@ -59,3 +59,12 @@ func (m *MongoCollection) UpdateOne(ctx context.Context, filter, update interfac
 func (m *MongoCollection) UpdateMany(ctx context.Context, filter, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 	return m.Collection.UpdateMany(ctx, filter, update, opts...)
 }
+
+// agregate 
+func (m *MongoCollection) Aggregate(ctx context.Context, pipeline interface{}, opts ...*options.AggregateOptions) (domain.Cursor, error) {
+	cursor, err := m.Collection.Aggregate(ctx, pipeline, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &MongoCursor{Cursor: cursor}, nil
+}

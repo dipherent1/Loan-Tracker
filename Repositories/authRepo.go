@@ -147,7 +147,6 @@ func (a *AuthRepo) Login(ctx context.Context, user domain.User) domain.Respose {
 		Data:    tokens,
 		AccessToken: tokens.AccessToken,
 	}
-
 }
 
 func (a *AuthRepo) GenerateTokenFromUser(ctx context.Context, existingUser domain.User) (domain.Tokens, error, int) {

@@ -28,3 +28,10 @@ type RefreshRepository interface {
 	FindToken(ctx context.Context, userid primitive.ObjectID) (string, error, int)
 	StoreToken(ctx context.Context, userid primitive.ObjectID, refreshToken string) (error, int)
 }
+
+type RefreshUseCase interface {
+	// UpdateToken(c *gin.Context, refreshToken string, userid primitive.ObjectID) (error, int)
+	DeleteToken(c *gin.Context, userid primitive.ObjectID) (error, int)
+	FindToken(c *gin.Context, userid primitive.ObjectID) (string, error, int)
+	StoreToken(c *gin.Context, userid primitive.ObjectID, refreshToken string) (error, int)
+}

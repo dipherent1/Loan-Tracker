@@ -10,6 +10,7 @@ import (
 var router *gin.Engine
 var DataBase custommongo.Database
 
+
 func Setuprouter(client custommongo.Client) *gin.Engine {
 	// Initialize the database
 	DataBase = client.Database("Loan-Tracker")

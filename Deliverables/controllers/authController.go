@@ -2,7 +2,6 @@ package controllers
 
 import (
 	domain "loaner/Domain"
-	dtos "loaner/Dtos"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -38,12 +37,10 @@ func (a *AuthController) Register(c *gin.Context) {
 	}
 
 	response := a.authUsecase.Register(c, newUser)
-	data := response.Data.(dtos.RegisterUserDto)
 
 	if response.Status != http.StatusOK {
 		c.IndentedJSON(response.Status,
-			gin.H{"message": response.Message,
-				"data": data})
+			gin.H{"message": response.Message})
 		return
 	}
 }

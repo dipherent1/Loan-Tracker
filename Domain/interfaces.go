@@ -9,17 +9,16 @@ import (
 
 // generate interface for the AuthRepo
 type AuthRepo interface {
-	Register(ctx context.Context, newUser *User) Respose
-	Login(ctx context.Context, user User) Respose
-	Activate(ctx context.Context, token string) Respose
-
+	Register(ctx context.Context, newUser *User) Response
+	Login(ctx context.Context, user User) Response
+	Activate(ctx context.Context, token string) Response
 }
 
 // generate interface for the AuthUsecase
 type AuthUsecase interface {
-	Register(c *gin.Context, newUser *User) Respose
-	Login(c *gin.Context, user User) Respose
-	Activate (c *gin.Context, token string) Respose
+	Register(c *gin.Context, newUser *User) Response
+	Login(c *gin.Context, user User) Response
+	Activate(c *gin.Context, token string) Response
 }
 
 type RefreshRepository interface {
@@ -37,9 +36,19 @@ type RefreshUseCase interface {
 }
 
 type UserRepo interface {
-	GetUserById(ctx context.Context, id primitive.ObjectID) Respose
+	GetUserById(ctx context.Context, id primitive.ObjectID) Response
 }
 
 type UserUsecase interface {
-	GetUserById(c *gin.Context, id primitive.ObjectID) Respose
+	GetUserById(c *gin.Context, id primitive.ObjectID) Response
+}
+
+type LoanRepo interface {
+	Apply(ctx context.Context, loan *Loan) Response
+	GetLoanById(ctx context.Context, loanID primitive.ObjectID, userID primitive.ObjectID) Response
+}
+
+type LoanUsecase interface {
+	Apply(c *gin.Context, loan *Loan) Response
+	GetLoanById(c *gin.Context, loanID primitive.ObjectID, userID primitive.ObjectID) Response
 }

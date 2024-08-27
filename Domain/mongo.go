@@ -17,6 +17,7 @@ type Collection interface {
 	CountDocuments(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int64, error)
 	UpdateOne(ctx context.Context, filter, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
 	UpdateMany(ctx context.Context, filter, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
+	Aggregate(ctx context.Context, pipeline interface{}, opts ...*options.AggregateOptions) (Cursor, error)
 }
 
 type Cursor interface {

@@ -9,7 +9,7 @@ import (
 
 // refreshRouter
 func RefreshTokenRouter() {
-	refreshRouter := router.Group("/refresh")
+	refreshRouter := Router.Group("/refresh")
 	{
 		// generate new auth repo
 		refreshrepo := repositories.NewRefreshRepository(DataBase)

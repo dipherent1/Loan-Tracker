@@ -2,25 +2,23 @@ package routers
 
 import (
 	"fmt"
-	custommongo "loaner/CustomMongo"
-
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var router *gin.Engine
-var DataBase custommongo.Database
+var Router *gin.Engine
+var DataBase *mongo.Database
 
-
-func Setuprouter(client custommongo.Client) *gin.Engine {
+func Setuprouter(client *mongo.Client) *gin.Engine {
 	// Initialize the database
 	DataBase = client.Database("Loan-Tracker")
 	fmt.Print(DataBase)
 
 	// Initialize the router
-	router = gin.Default()
+	Router = gin.Default()
 
 	// Initialize the Auth routes
 	AuthRouter()
 
-	return router
+	return Router
 }

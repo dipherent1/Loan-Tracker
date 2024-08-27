@@ -15,24 +15,25 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // generate a new repository that takes a registered, unregistered, and refreshtokn collection
 // and returns a new repository
 type AuthRepo struct {
-	verified     custommongo.Collection
-	unverified   custommongo.Collection
+	verified     domain.Collection
+	unverified   domain.Collection
 	refreshRepo  domain.RefreshRepository
 	emailservice emailservice.MailTrapService
 }
 
 // generate a new repository that takes a registered, unregistered, and refreshtokn collection
 // and returns a new repository
-func NewAuthRepo(database custommongo.Database) *AuthRepo {
+func NewAuthRepo(database *mongo.Database) *AuthRepo {
 
 	return &AuthRepo{
-		verified:     database.Collection("verified"),
-		unverified:   database.Collection("unverified"),
+		verified:     custommongo.NewMongoCollection(database.Collection("verified")),
+		unverified:   custommongo.NewMongoCollection(database.Collection("unverified")),
 		refreshRepo:  NewRefreshRepository(database),
 		emailservice: emailservice.NewMailTrapService(),
 	}
@@ -80,7 +81,7 @@ func (a *AuthRepo) Register(ctx context.Context, newUser *domain.User) domain.Re
 
 	var userDto dtos.RegisterUserDto
 	// get user from database
-	insertedID := InsertedID.(primitive.ObjectID)
+	insertedID := InsertedID.InsertedID.(primitive.ObjectID)
 	err = a.unverified.FindOne(ctx, bson.D{{"_id", insertedID}}).Decode(&userDto)
 	if err != nil {
 		return domain.Respose{

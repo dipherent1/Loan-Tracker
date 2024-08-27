@@ -7,15 +7,16 @@ import (
 	domain "loaner/Domain"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type RefreshRepository struct {
-	collection custommongo.Collection
+	collection domain.Collection
 }
 
-func NewRefreshRepository(database custommongo.Database) *RefreshRepository {
+func NewRefreshRepository(database *mongo.Database) *RefreshRepository {
 	return &RefreshRepository{
-		collection: database.Collection("refreshtoken"),
+		collection: custommongo.NewMongoCollection(database.Collection("refreshtoken")),
 	}
 }
 

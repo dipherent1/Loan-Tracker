@@ -43,3 +43,11 @@ type UserRepo interface {
 type UserUsecase interface {
 	GetUserById(c *gin.Context, id primitive.ObjectID) Respose
 }
+
+type LoanRepo interface {
+	Apply(ctx context.Context, loan *Loan) Respose
+}
+
+type LoanUsecase interface {
+	Apply(c *gin.Context, loan *Loan) Respose
+}

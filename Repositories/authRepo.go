@@ -58,9 +58,11 @@ func (a *AuthRepo) Register(ctx context.Context, newUser *domain.User) domain.Re
 	}
 
 	newUser.Password = hashedPassword
-	if newUser.UserName != "" {
+	
+	if newUser.UserName == "" {
 		newUser.UserName = newUser.Email + "_user"
 	}
+	fmt.Println(newUser.UserName)
 
 	newUser.ID = primitive.NewObjectID()
 	newUser.Role = "user"
@@ -237,6 +239,10 @@ func (a *AuthRepo) SendActivationEmail(email string) (error, int) {
 	if err != nil {
 		return err, http.StatusInternalServerError
 	}
+	fmt.Println("----")
+	fmt.Println("email service not working, copy token from terminal and use to activate")
+	fmt.Println("----")
+	fmt.Println("activationToken", activationToken)
 
 	err = a.emailservice.SendEmail(email, "Verify Email", `Click "`+Config.BASE_URL+`/auth/activate/`+activationToken+`"here to verify email.
 `, "reset")

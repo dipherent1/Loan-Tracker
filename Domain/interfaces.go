@@ -35,3 +35,11 @@ type RefreshUseCase interface {
 	FindToken(c *gin.Context, userid primitive.ObjectID) (string, error, int)
 	StoreToken(c *gin.Context, userid primitive.ObjectID, refreshToken string) (error, int)
 }
+
+type UserRepo interface {
+	GetUserById(ctx context.Context, id primitive.ObjectID) Respose
+}
+
+type UserUsecase interface {
+	GetUserById(c *gin.Context, id primitive.ObjectID) Respose
+}

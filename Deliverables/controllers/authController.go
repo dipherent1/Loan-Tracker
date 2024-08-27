@@ -69,7 +69,9 @@ func (a *AuthController) Login(c *gin.Context) {
 			gin.H{"message": response.Message})
 		return
 	}
-	c.IndentedJSON(response.Status, gin.H{"access_token": response.AccessToken})
+	c.IndentedJSON(response.Status, gin.H{
+		"access_token": response.AccessToken,
+		"message":      response.Message})
 }
 
 // activate is a function that activates a user
@@ -82,6 +84,7 @@ func (a *AuthController) Activate(c *gin.Context) {
 			gin.H{"message": "invalid token"})
 		return
 	}
+
 	response := a.authUsecase.Activate(c, token)
 
 	c.IndentedJSON(response.Status,

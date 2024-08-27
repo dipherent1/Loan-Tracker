@@ -14,8 +14,7 @@ type RegisterUserDto struct {
 	UserName   string             `json:"username" bson:"username"`
 	CreatedAt  time.Time          `json:"created_at" bson:"created_at"`
 	UpdatedAt  time.Time          `json:"updated_at" bson:"updated_at"`
-	Role       string             `json:"role" bson:"role"`
-	IsVerified bool               `json:"-" bson:"is_verified"`
+	Role       string             `json:"-" bson:"role"`
 }
 
 type LoginUserDto struct {

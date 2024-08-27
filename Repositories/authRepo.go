@@ -22,7 +22,7 @@ import (
 type AuthRepo struct {
 	verified     custommongo.Collection
 	unverified   custommongo.Collection
-	refreshtoken custommongo.Collection
+	refreshRepo  domain.RefreshRepository
 	emailservice emailservice.MailTrapService
 }
 
@@ -33,7 +33,7 @@ func NewAuthRepo(database custommongo.Database) *AuthRepo {
 	return &AuthRepo{
 		verified:     database.Collection("verified"),
 		unverified:   database.Collection("unverified"),
-		refreshtoken: database.Collection("refreshtoken"),
+		refreshRepo:  NewRefreshRepository(database),
 		emailservice: emailservice.NewMailTrapService(),
 	}
 }
@@ -132,50 +132,62 @@ func (a *AuthRepo) Login(ctx context.Context, user domain.User) domain.Respose {
 		}
 	}
 
-	return domain.Respose{}
-	
+	// generate token
+	tokens, err, statusCode := a.GenerateTokenFromUser(ctx, existingUser)
+	if err != nil {
+		return domain.Respose{
+			Status:  statusCode,
+			Message: "Error generating token",
+		}
+	}
+
+	return domain.Respose{
+		Status:  http.StatusOK,
+		Message: "User logged in successfully",
+		Data:    tokens,
+	}
+
 }
 
+func (a *AuthRepo) GenerateTokenFromUser(ctx context.Context, existingUser domain.User) (domain.Tokens, error, int) {
 
-// func (a *AuthRepo) GenerateTokenFromUser(ctx context.Context, existingUser domain.User) (domain.Tokens, error, int) {
+	// filter := bson.D{{Key: "email", Value: existingUser.Email}}
+	// Generate JWT access
+	jwtAccessToken, err := jwtservice.CreateAccessToken(existingUser)
+	if err != nil {
+		return domain.Tokens{}, err, 500
+	}
+	refreshToken, err := jwtservice.CreateRefreshToken(existingUser)
+	if err != nil {
+		return domain.Tokens{}, err, 500
+	}
 
-// 	// filter := bson.D{{Key: "email", Value: existingUser.Email}}
-// 	// Generate JWT access
-// 	jwtAccessToken, err := jwtservice.CreateAccessToken(existingUser)
-// 	if err != nil {
-// 		return domain.Tokens{}, err, 500
-// 	}
-// 	refreshToken, err := jwtservice.CreateRefreshToken(existingUser)
-// 	if err != nil {
-// 		return domain.Tokens{}, err, 500
-// 	}
+	// filter := primitive.D{{"_id", existingUser.ID}}
+	existingToken, err, statusCode := a.refreshRepo.FindToken(ctx, existingUser.ID)
+	if err != nil && err.Error() != "mongo: no documents in result" {
+		fmt.Println("error at count", err)
+		return domain.Tokens{}, err, statusCode
+	}
 
-// 	// filter := primitive.D{{"_id", existingUser.ID}}
-// 	existingToken, err, statusCode := a.TokenRepository.FindToken(ctx, existingUser.ID)
-// 	if err != nil && err.Error() != "mongo: no documents in result" {
-// 		fmt.Println("error at count", err)
-// 		return domain.Tokens{}, err, statusCode
-// 	}
+	if existingToken != "" {
+		// update the refresh token
+		err, statusCode := a.refreshRepo.UpdateToken(ctx, refreshToken, existingUser.ID)
+		if err != nil {
+			return domain.Tokens{}, err, statusCode
+		}
 
-// 	if existingToken != "" {
-// 		// update the refresh token
-// 		err, statusCode := a.TokenRepository.UpdateToken(ctx, refreshToken, existingUser.ID)
-// 		if err != nil {
-// 			return domain.Tokens{}, err, statusCode
-// 		}
+	} else {
+		err, statusCode := a.refreshRepo.StoreToken(ctx, existingUser.ID, refreshToken)
+		if err != nil {
+			return domain.Tokens{}, err, statusCode
+		}
+	}
 
-// 	} else {
-// 		err, statusCode := a.TokenRepository.StoreToken(ctx, existingUser.ID, refreshToken)
-// 		if err != nil {
-// 			return domain.Tokens{}, err, statusCode
-// 		}
-// 	}
-
-// 	return domain.Tokens{
-// 		AccessToken:  jwtAccessToken,
-// 		RefreshToken: refreshToken,
-// 	}, nil, 200
-// }
+	return domain.Tokens{
+		AccessToken:  jwtAccessToken,
+		RefreshToken: refreshToken,
+	}, nil, 200
+}
 
 func (a *AuthRepo) ActivateAccount(ctx context.Context, token string) domain.Respose {
 	email, err := jwtservice.VerifyToken(token)
@@ -190,7 +202,7 @@ func (a *AuthRepo) ActivateAccount(ctx context.Context, token string) domain.Res
 	var user domain.User
 	err = a.unverified.FindOne(ctx, bson.D{{"email", email}}).Decode(&user)
 	if err != nil {
-		return	domain.Respose{
+		return domain.Respose{
 			Status:  http.StatusInternalServerError,
 			Message: "Error getting user",
 		}

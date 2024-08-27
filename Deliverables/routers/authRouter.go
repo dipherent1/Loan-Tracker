@@ -17,6 +17,11 @@ func AuthRouter () {
 
 	// Initialize the Auth routes
 	router.POST("/register", authController.Register)
+	// initialize the login route
+	router.POST("/login", authController.Login)
+	// initialize the activate route
+	router.GET("/activate/:token", authController.Activate)
+
 	
 	
 }

@@ -31,3 +31,17 @@ func (a *AuthUsecase) Register(c *gin.Context, newUser *domain.User) domain.Resp
 	return a.authRepo.Register(ctx, newUser)
 
 }
+
+func (a *AuthUsecase) Login(c *gin.Context, user domain.User) domain.Respose{
+	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
+	defer cancel()
+	
+	return a.authRepo.Login(ctx, user)
+}
+
+func (a *AuthUsecase) Activate(c *gin.Context, token string) domain.Respose{
+	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
+	defer cancel()
+
+	return a.authRepo.Activate(ctx, token)
+}

@@ -10,11 +10,16 @@ import (
 // generate interface for the AuthRepo
 type AuthRepo interface {
 	Register(ctx context.Context, newUser *User) Respose
+	Login(ctx context.Context, user User) Respose
+	Activate(ctx context.Context, token string) Respose
+
 }
 
 // generate interface for the AuthUsecase
 type AuthUsecase interface {
 	Register(c *gin.Context, newUser *User) Respose
+	Login(c *gin.Context, user User) Respose
+	Activate (c *gin.Context, token string) Respose
 }
 
 type RefreshRepository interface {

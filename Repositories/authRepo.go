@@ -145,6 +145,7 @@ func (a *AuthRepo) Login(ctx context.Context, user domain.User) domain.Respose {
 		Status:  http.StatusOK,
 		Message: "User logged in successfully",
 		Data:    tokens,
+		AccessToken: tokens.AccessToken,
 	}
 
 }
@@ -189,7 +190,7 @@ func (a *AuthRepo) GenerateTokenFromUser(ctx context.Context, existingUser domai
 	}, nil, 200
 }
 
-func (a *AuthRepo) ActivateAccount(ctx context.Context, token string) domain.Respose {
+func (a *AuthRepo) Activate(ctx context.Context, token string) domain.Respose {
 	email, err := jwtservice.VerifyToken(token)
 	if err != nil {
 		return domain.Respose{
@@ -228,7 +229,6 @@ func (a *AuthRepo) ActivateAccount(ctx context.Context, token string) domain.Res
 		Status:  http.StatusOK,
 		Message: "User activated successfully",
 	}
-
 }
 
 func (a *AuthRepo) SendActivationEmail(email string) (error, int) {
@@ -241,7 +241,7 @@ func (a *AuthRepo) SendActivationEmail(email string) (error, int) {
 	err = a.emailservice.SendEmail(email, "Verify Email", `Click "`+Config.BASE_URL+`/auth/activate/`+activationToken+`"here to verify email.
 `, "reset")
 	if err != nil {
-		fmt.Println("in activation email 2")
+		fmt.Println("in activation email error")
 		return err, http.StatusInternalServerError
 	}
 

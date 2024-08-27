@@ -3,32 +3,35 @@ package Config
 import (
 	"context"
 	"fmt"
-	custommongo "loaner/CustomMongo"
 	"log"
 	"time"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func ping(client custommongo.Client, ctx context.Context) error {
-	if err := client.Ping(ctx); err != nil {
+func ping(client *mongo.Client, ctx context.Context) error {
+	if err := client.Ping(ctx, readpref.Primary()); err != nil {
 		return err
 	}
 	fmt.Println("Connected to MongoDB successfully!")
 	return nil
 }
 
-func ConnectDB() custommongo.Client {
+func ConnectDB() *mongo.Client {
 	Envinit()
-	// Connect to the database
-	client, err := custommongo.NewClient(MONGO_CONNECTION_STRING)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	clientOptions := options.Client().ApplyURI(MONGO_CONNECTION_STRING)
+	client, err := mongo.Connect(ctx, clientOptions)
 
 	if err != nil {
 		log.Fatalf("Failed to connect to MongoDB: %v", err)
 	}
-	// create a context with time out
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
 
-	// Ping the database
 	err = ping(client, ctx)
 	if err != nil {
 		log.Fatalf("Failed to ping MongoDB: %v", err)

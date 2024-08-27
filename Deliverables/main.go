@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"loaner/Config"
 	"loaner/Deliverables/routers"
 	"log"
@@ -10,7 +11,10 @@ import (
 func main() {
 	// Connect to the database
 	client := Config.ConnectDB()
-
+	fmt.Println(client)
+	fmt.Println(client)
+	fmt.Println(client)
+	fmt.Println(client)
 	// Defer the closing of the database
 	defer func() {
 		if err := client.Disconnect(context.TODO()); err != nil {

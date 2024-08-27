@@ -63,6 +63,7 @@ func (s *mailTrapService) SendEmail(toEmail string, subject string, text string,
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
 	if err != nil {
+		fmt.Println("error creating request")
 		return err
 	}
 	for key, value := range headers {

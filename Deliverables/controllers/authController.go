@@ -40,11 +40,10 @@ func (a *AuthController) Register(c *gin.Context) {
 	// extract the data from the response, it should be a dtos.UserRegistrstion type
 	// then return the data to the user
 
-	if response.Status != http.StatusOK {
-		c.IndentedJSON(response.Status,
-			gin.H{"message": response.Message})
-		return
-	}
+	c.JSON(response.Status, gin.H{
+		"message": response.Message,
+		"data":    response.Data,
+	})
 }
 
 // Login is a function that logs in a user

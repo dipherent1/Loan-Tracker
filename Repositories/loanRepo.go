@@ -78,7 +78,7 @@ func (l *LoanRepo) GetLoanById(ctx context.Context, loanID primitive.ObjectID, u
 }
 	
 // get all loans
-func (l *LoanRepo) GetAllLoans(ctx context.Context) domain.Response {
+func (l *LoanRepo) GetAllLoans(ctx context.Context, filter domain.Filter) domain.Response {
 	var loans []domain.Loan
 	cursor, err := l.loanCollections.Find(ctx, primitive.M{})
 	if err != nil {

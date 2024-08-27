@@ -6,3 +6,8 @@ type Response struct {
 	Data        interface{} `json:"data ,omitempty"`
 	AccessToken string      `json:"access_token ,omitempty"`
 }
+
+type Filter struct {
+	StatusOrder []string `json:"status_order"`
+	OrderBy	 string   `json:"order_by"`
+}
